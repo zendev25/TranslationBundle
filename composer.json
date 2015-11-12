@@ -10,23 +10,10 @@
             "email": "fab@unmecdubweb.com"
         }],
     "require": {
-        "symfony/framework-bundle": "~2.1",
-        "nikic/php-parser": "0.9.4",
-        "symfony/console": "*"
-    },
-    "require-dev": {
-        "symfony/twig-bundle": "*",
-        "symfony/browser-kit": "*",
-        "symfony/class-loader": "*",
-        "symfony/css-selector": "*",
-        "symfony/finder": "*",
-        "symfony/form": "*",
-        "symfony/validator": "*",
-        "symfony/security": "*",
-        "symfony/process": "*",
-        "symfony/yaml": "*",
-        "sensio/framework-extra-bundle": "*",
-        "LI/di-extra-bundle": ">=1.1"
+        "php": ">=5.5.0",
+        "symfony/framework-bundle": ">=2.5.6",
+        "twig/twig": "*",
+        "doctrine/doctrine-bundle": "*"
     },
     "autoload": {
         "psr-0": {
