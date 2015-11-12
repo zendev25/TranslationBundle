@@ -1,0 +1,32 @@
+{% extends "ZENTranslationBundle::base.html.twig" %}
+
+
+{% block body %}
+
+    {#Suppimer un domaine#}
+    <h2>Supprimer un domaine</h2>
+    <form action="{{ path("zen_translation_delete_domain") }}" method="post">
+
+        <select name="config" class="span3">
+            {% for config in configs %}
+                <option value="{{ config }}"{% if config == selectedConfig %} selected="selected"{% endif %}>{{ config }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="domain" class="span3">
+            {% for domain in domains %}
+                <option value="{{ domain }}"{% if domain == selectedDomain %} selected="selected"{% endif %}>{{ domain }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="locale" class="span2">
+            {% for locale in locales %}
+                <option value="{{ locale }}"{% if locale == selectedLocale %} selected="selected"{% endif %}>{{ locale }}</option>
+            {% endfor %}
+        </select>
+
+        <input type="submit" />
+    </form>
+
+
+{% endblock %}

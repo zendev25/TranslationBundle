@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>{% block title %}ZENTranslationBundle UI{% endblock %}</title>
+        {# <link rel="stylesheet" type="text/css" media="screen" href="{{ asset("bundles/zentranslation/css/bootstrap.css") }}" />
+         <link rel="stylesheet" type="text/css" media="screen" href="{{ asset("bundles/zentranslation/css/layout.css") }}" />#}
+        {% stylesheets 'bundles/zentranslation/css/*' filter='cssrewrite' %}
+        <link rel="stylesheet" href="{{ asset_url }}" type="text/css" />
+        {% endstylesheets %}
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+    {% block topjavascripts %}{% endblock %}
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbar-inner">
+            <div class="container">
+                <h3><a href="{{ path("zen_translation_index") }}" class="logo">ZENTranslationBundle UI</a></h3>
+                <ul class="nav">
+                    <li><a href="{{ path("zen_translation_delete_domain") }}">Supprimer un domain</a></li>
+                    <li><a target="_blank" href="{{ path("zen_translation_cache_clear") }}">Vider la cache</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+    {% block body %}{% endblock %}
+</div>
+
+{% block javascripts %}
+    {% javascripts 'bundles/zentranslation/js/*' %}
+    <script type="text/javascript" src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+    {#    <script language="javascript" type="text/javascript" src="{{ asset("bundles/zentranslation/js/jquery.js") }}"></script>#}
+{% endblock %}
+</body>
+</html>

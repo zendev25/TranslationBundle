@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="zen_translation.twig_extension.class">ZEN\TranslationBundle\Twig\TranslationExtension</parameter>
+        
+        <parameter key="zen_translation.extractor_manager.class">ZEN\TranslationBundle\Translation\ExtractorManager</parameter>
+        <parameter key="zen_translation.extractor.file_extractor.class">ZEN\TranslationBundle\Translation\Extractor\FileExtractor</parameter>
+        <parameter key="zen_translation.extractor.file.default_php_extractor">ZEN\TranslationBundle\Translation\Extractor\File\DefaultPhpFileExtractor</parameter>
+        <parameter key="zen_translation.extractor.file.translation_container_extractor">ZEN\TranslationBundle\Translation\Extractor\File\TranslationContainerExtractor</parameter>
+        <parameter key="zen_translation.extractor.file.twig_extractor">ZEN\TranslationBundle\Translation\Extractor\File\TwigFileExtractor</parameter>
+        <parameter key="zen_translation.extractor.file.form_extractor.class">ZEN\TranslationBundle\Translation\Extractor\File\FormExtractor</parameter>
+        <parameter key="zen_translation.extractor.file.validation_extractor.class">ZEN\TranslationBundle\Translation\Extractor\File\ValidationExtractor</parameter>
+        <parameter key="zen_translation.extractor.file.authentication_message_extractor.class">ZEN\TranslationBundle\Translation\Extractor\File\AuthenticationMessagesExtractor</parameter>
+        
+        <parameter key="zen_translation.loader.symfony.xliff_loader.class">ZEN\TranslationBundle\Translation\Loader\Symfony\XliffLoader</parameter>
+        <parameter key="zen_translation.loader.xliff_loader.class">ZEN\TranslationBundle\Translation\Loader\XliffLoader</parameter>
+        <parameter key="zen_translation.loader.symfony_adapter.class">ZEN\TranslationBundle\Translation\Loader\SymfonyLoaderAdapter</parameter>
+        <parameter key="zen_translation.loader_manager.class">ZEN\TranslationBundle\Translation\LoaderManager</parameter>
+        
+        <parameter key="zen_translation.dumper.php_dumper.class">ZEN\TranslationBundle\Translation\Dumper\PhpDumper</parameter>
+        <parameter key="zen_translation.dumper.xliff_dumper.class">ZEN\TranslationBundle\Translation\Dumper\XliffDumper</parameter>
+        <parameter key="zen_translation.dumper.yaml_dumper.class">ZEN\TranslationBundle\Translation\Dumper\YamlDumper</parameter>
+        <parameter key="zen_translation.dumper.symfony_adapter.class">ZEN\TranslationBundle\Translation\Dumper\SymfonyDumperAdapter</parameter>
+        
+        <parameter key="zen_translation.file_writer.class">ZEN\TranslationBundle\Translation\FileWriter</parameter>
+        
+        <parameter key="zen_translation.updater.class">ZEN\TranslationBundle\Translation\Updater</parameter>
+        <parameter key="zen_translation.config_factory.class">ZEN\TranslationBundle\Translation\ConfigFactory</parameter>
+    </parameters>
+
+    <services>
+        <service id="zen_translation.updater" class="%zen_translation.updater.class%">
+            <argument type="service" id="zen_translation.loader_manager" />
+            <argument type="service" id="zen_translation.extractor_manager" />
+            <argument type="service" id="logger" />
+            <argument type="service" id="zen_translation.file_writer" />
+        </service>
+        
+        <service id="zen_translation.config_factory" class="%zen_translation.config_factory.class%" />
+        
+        <service id="zen_translation.file_writer" class="%zen_translation.file_writer.class%" public="false" />
+        
+        <!-- Loaders -->
+        <service id="zen_translation.loader.symfony_adapter" class="%zen_translation.loader.symfony_adapter.class%" public="false" abstract="true" />
+        <service id="zen_translation.loader_manager" class="%zen_translation.loader_manager.class%" /><!-- public as needed by the TranslateController -->
+        <service id="zen_translation.loader.xliff_loader" class="%zen_translation.loader.xliff_loader.class%" public="false">
+            <tag name="zen_translation.loader" format="xliff" />
+        </service>
+        
+        <!-- Dumpers -->
+        <service id="zen_translation.dumper.php_dumper" class="%zen_translation.dumper.php_dumper.class%" public="false">
+            <tag name="zen_translation.dumper" format="php" />
+        </service>
+        <service id="zen_translation.dumper.xliff_dumper" class="%zen_translation.dumper.xliff_dumper.class%" public="false">
+            <call method="setSourceLanguage">
+                <argument>%zen_translation.source_language%</argument>
+            </call>
+            <tag name="zen_translation.dumper" format="xliff" />
+        </service>
+        <service id="zen_translation.dumper.xlf_dumper" class="%zen_translation.dumper.xliff_dumper.class%" public="false">
+            <call method="setSourceLanguage">
+                <argument>%zen_translation.source_language%</argument>
+            </call>
+            <tag name="zen_translation.dumper" format="xlf" />
+        </service>
+        <service id="zen_translation.dumper.yaml_dumper" class="%zen_translation.dumper.yaml_dumper.class%" public="false">
+            <tag name="zen_translation.dumper" format="yml" />
+        </service>
+        <service id="zen_translation.dumper.symfony_adapter" class="%zen_translation.dumper.symfony_adapter.class%" public="false" abstract="true" />
+        
+        <!-- Extractors -->
+        <service id="zen_translation.extractor_manager" class="%zen_translation.extractor_manager.class%" public="false">
+            <argument type="service" id="zen_translation.extractor.file_extractor" />
+            <argument type="service" id="logger" />
+        </service>
+        
+        <!-- File-based extractors -->
+        <service id="zen_translation.extractor.file_extractor" class="%zen_translation.extractor.file_extractor.class%" public="false">
+            <argument type="service" id="twig" />
+            <argument type="service" id="logger" />
+        </service>
+        <service id="zen_translation.extractor.file.default_php_extractor" class="%zen_translation.extractor.file.default_php_extractor%" public="false">
+            <argument type="service" id="zen_translation.doc_parser" />
+            <tag name="zen_translation.file_visitor" />
+        </service>
+        <service id="zen_translation.extractor.file.form_extractor" class="%zen_translation.extractor.file.form_extractor.class%" public="false">
+            <argument type="service" id="zen_translation.doc_parser" />
+            <tag name="zen_translation.file_visitor" />
+        </service>
+        <service id="zen_translation.extractor.file.translation_container_extractor" class="%zen_translation.extractor.file.translation_container_extractor%" public="false">
+            <tag name="zen_translation.file_visitor" />
+        </service>
+        <service id="zen_translation.extractor.file.twig_extractor" class="%zen_translation.extractor.file.twig_extractor%" public="false">
+            <argument type="service" id="twig" />
+            <tag name="zen_translation.file_visitor" />
+        </service>
+        <service id="zen_translation.extractor.file.validation_extractor" class="%zen_translation.extractor.file.validation_extractor.class%" public="false">
+            <argument type="service" id="validator.mapping.class_metadata_factory" />
+            <tag name="zen_translation.file_visitor" />
+        </service>
+        <service id="zen_translation.extractor.file.authentication_message_extractor" class="%zen_translation.extractor.file.authentication_message_extractor.class%" public="false">
+            <argument type="service" id="zen_translation.doc_parser" />
+            <tag name="zen_translation.file_visitor" />
+        </service>
+        
+        <!-- Util -->
+        <service id="zen_translation.doc_parser" class="Doctrine\Common\Annotations\DocParser" public="false">
+            <call method="setImports">
+                <argument type="collection">
+                    <argument key="desc">ZEN\TranslationBundle\Annotation\Desc</argument>
+                    <argument key="meaning">ZEN\TranslationBundle\Annotation\Meaning</argument>
+                    <argument key="ignore">ZEN\TranslationBundle\Annotation\Ignore</argument>
+                </argument>
+            </call>
+            <call method="setIgnoreNotImportedAnnotations">
+                <argument>true</argument>
+            </call>
+        </service>
+
+        <service id="zen_translation.twig_extension" class="%zen_translation.twig_extension.class%">
+            <argument type="service" id="translator" />
+            <argument>%kernel.debug%</argument>
+            <tag name="twig.extension" />
+        </service>
+    </services>
+</container>

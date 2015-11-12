@@ -1,0 +1,37 @@
+{
+    "name": "zen/translation-bundle",
+    "type": "symfony-bundle",
+    "authors": [{
+            "name": "Charly Mainier",
+            "email": "charly.mainier@gmail.com"
+        },
+        {
+            "name": "Fabien Normand",
+            "email": "fab@unmecdubweb.com"
+        }],
+    "require": {
+        "symfony/framework-bundle": "~2.1",
+        "nikic/php-parser": "0.9.4",
+        "symfony/console": "*"
+    },
+    "require-dev": {
+        "symfony/twig-bundle": "*",
+        "symfony/browser-kit": "*",
+        "symfony/class-loader": "*",
+        "symfony/css-selector": "*",
+        "symfony/finder": "*",
+        "symfony/form": "*",
+        "symfony/validator": "*",
+        "symfony/security": "*",
+        "symfony/process": "*",
+        "symfony/yaml": "*",
+        "sensio/framework-extra-bundle": "*",
+        "LI/di-extra-bundle": ">=1.1"
+    },
+    "autoload": {
+        "psr-0": {
+            "ZEN\\TranslationBundle": ""
+        }
+    },
+    "target-dir": "ZEN/TranslationBundle"
+}

@@ -1,0 +1,284 @@
+{% extends "ZENTranslationBundle::base.html.twig" %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script language="javascript" type="text/javascript">
+        $(document).ready(function () {
+            var updateMessagePath = {{ path("zen_translation_update_message", {"config": selectedConfig, "domain": selectedDomain, "locale": selectedLocale})|json_encode|raw }};
+            var addMessagePath = {{ path("zen_translation_add_message", {"config": selectedConfig, "domain": selectedDomain, "locale": selectedLocale})|json_encode|raw }};
+            var delMessagePath = {{ path("zen_translation_delete_message", {"config": selectedConfig, "domain": selectedDomain, "locale": selectedLocale})|json_encode|raw }};
+                    $('#config select').change(function () {
+                $(this).parent().submit();
+            });
+
+        {% if isWriteable is sameas(true) %}
+                $('textarea')
+                        .blur(function () {
+                            var self = this;
+                            domainPos = updateMessagePath.indexOf('/domains/');
+                            localePos = updateMessagePath.indexOf('/locales/');
+                            newUrl = updateMessagePath.substr(0, domainPos) + '/domains/' + $(this).data('domain') + updateMessagePath.substr(localePos);
+
+                            $.ajax(newUrl + '?id=' + encodeURIComponent($(this).data('id')), {
+                                type: 'POST',
+                                headers: {'X-HTTP-METHOD-OVERRIDE': 'PUT'},
+                                data: {'_method': 'PUT', 'message': $(this).val()},
+                                beforeSend: function () {
+                                    $(self).parent().closest('td').prev('td').children('.alert-message').remove();
+                                },
+                                error: function () {
+                                    $(self).parent().closest('td').prev('td').append('<span class="alert-message label error">Could not be saved.</span>');
+                                },
+                                success: function () {
+                                    $(self).parent().closest('td').prev('td').append('<span class="alert-message label success">Translation was saved.</span>');
+                                },
+                                complete: function () {
+                                    var parent = $(self).parent();
+                                    $(self).data('timeoutId', setTimeout(function () {
+                                        $(self).data('timeoutId', undefined);
+                                        parent.closest('td').prev('td').children('.alert-message').fadeOut(300, function () {
+                                            $(this).remove();
+                                        });
+                                    }, 10000));
+                                }
+                            });
+                        })
+                        .focus(function () {
+                            this.select();
+
+                            var timeoutId = $(this).data('timeoutId');
+                            if (timeoutId) {
+                                clearTimeout(timeoutId);
+                                $(this).data('timeoutId', undefined);
+                            }
+
+                            $(this).parent().children('.alert-message').remove();
+                        })
+                        ;
+                        
+                        
+                $('.close').click(function () {
+                    if (confirm('Êtes vous sur ?')) {
+                        var self = this;
+                        domainPos = delMessagePath.indexOf('/domains/');
+                        localePos = delMessagePath.indexOf('/locales/');
+                        domain = $(this).parents('tr').find('.message').data('domain');
+                        id = $(this).parents('tr').find('.message').data('id');
+
+                        newUrl = delMessagePath.substr(0, domainPos) + '/domains/' + domain + delMessagePath.substr(localePos);
+
+                        $.ajax(newUrl + '?id=' + encodeURIComponent(id), {
+                            type: 'POST',
+                            headers: {'X-HTTP-METHOD-OVERRIDE': 'PUT'},
+                            data: {'_method': 'PUT', 'message': $(this).val()},
+                            beforeSend: function () {
+                                $(self).parents("table").children('.alert-message').remove();
+                            },
+                            error: function () {
+                                $(self).parents("table").prepend('<span class="alert-message label error">Could not be deleted.</span>');
+                            },
+                            success: function () {
+                                $(self).parents("table").prepend('<span class="alert-message label success">Translation was deleted.</span>');
+                            },
+                            complete: function () {
+                                 $(self).parents("tr").remove();
+                                var parent = $(self).parents("table");
+                                $(self).data('timeoutId', setTimeout(function () {
+                                    $(self).data('timeoutId', undefined);
+                                    parent.children('.alert-message').fadeOut(300, function () {
+                                        $(this).remove();
+                                    });
+                                }, 10000));
+
+
+                            }
+                        });
+                        }
+                    });
+                        
+                        
+                        $('#add_message').click(function () {
+                            
+                            domain = $('#domain option:selected').val();
+                            locale = $('#locale option:selected').val();
+                            key = $('#key').val();
+
+                            var self = this;
+                            domainPos = addMessagePath.indexOf('/domains/');
+                            localePos = addMessagePath.indexOf('/locales/');
+                            newUrl = addMessagePath.substr(0, domainPos) + '/domains/' + domain + addMessagePath.substr(localePos);
+
+                            $.ajax(newUrl + '?id=' + encodeURIComponent(key), {
+                                type: 'POST',
+                                headers: {'X-HTTP-METHOD-OVERRIDE': 'PUT'},
+                                data: {'_method': 'PUT', 'message': $(this).val()},
+                                beforeSend: function () {
+                                    $(".btn-primary").next('.alert-message').remove();
+                                },
+                                error: function () {
+                                    $(".btn-primary").after('<span class="alert-message label error">Could not be added.</span>');
+                                },
+                                success: function () {
+                                    $(".btn-primary").after('<span class="alert-message label success">Translation was added.</span>');
+                                     location.reload();
+                                },
+                                complete: function () {
+                                    $(".btn-primary").next().data('timeoutId', setTimeout(function () {
+                                        $(self).data('timeoutId', undefined);
+                                        $(".btn-primary").next('.alert-message').fadeOut(300, function () {
+                                            $(this).remove();
+                                        });
+                                    }, 10000));
+                                }
+                            });
+                        })
+                        ;
+        {% endif %}
+
+                $('#table_trans_new').dataTable({
+                    "language": {
+                        "url": "{{asset("bundles/zentranslation/js/locale/fr_Fr.json")}}"
+                    }
+                });
+
+                $('#table_trans_exist').dataTable({
+                    "language": {
+                        "url": "{{asset("bundles/zentranslation/js/locale/fr_Fr.json")}}"
+                    }
+                });
+            });
+    </script>
+{% endblock %}
+
+{% block body %}
+
+    <form id="config" action="{{ path("zen_translation_index") }}" method="get">
+        <select name="config" class="span3">
+            {% for config in configs %}
+                <option value="{{ config }}"{% if config == selectedConfig %} selected="selected"{% endif %}>{{ config }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="domain" class="span3">
+            <option value="all">All</option>
+            {% for domain in domains %}
+                <option value="{{ domain }}"{% if domain == selectedDomain %} selected="selected"{% endif %}>{{ domain }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="locale" class="span2">
+            {% for locale in locales %}
+                <option value="{{ locale }}"{% if locale == selectedLocale %} selected="selected"{% endif %}>{{ locale }}</option>
+            {% endfor %}
+        </select>
+    </form>
+        
+    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+        Ajouter une clé
+    </button>
+    
+    <div class="modal fade" id="myModal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Ajouter une clé de traduction</h4>
+            </div>
+            <div class="modal-body">
+              <form method="post" id="modal">
+
+                <div>
+                    <select name="config" class="span3">
+                        {% for config in configs %}
+                            <option value="{{ config }}"{% if config == selectedConfig %} selected="selected"{% endif %}>{{ config }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select id="domain" name="domain" class="span3">
+                        {% for domain in domains %}
+                            <option value="{{ domain }}"{% if domain == selectedDomain %} selected="selected"{% endif %}>{{ domain }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select id="locale" name="locale" class="span2">
+                        {% for locale in locales %}
+                            <option value="{{ locale }}"{% if locale == selectedLocale %} selected="selected"{% endif %}>{{ locale }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label>Clé</label>
+                    <input type="text" id="key" />
+                </div>
+
+            </form>  
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button id="add_message" type="button" class="btn btn-default" data-dismiss="modal">Ajouter</button>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
+    
+    {#<form method="post" id="modal">
+
+        <select name="config" class="span3">
+            {% for config in configs %}
+                <option value="{{ config }}"{% if config == selectedConfig %} selected="selected"{% endif %}>{{ config }}</option>
+            {% endfor %}
+        </select>
+
+        <select id="domain" name="domain" class="span3">
+            {% for domain in domains %}
+                <option value="{{ domain }}"{% if domain == selectedDomain %} selected="selected"{% endif %}>{{ domain }}</option>
+            {% endfor %}
+        </select>
+
+        <select id="locale" name="locale" class="span2">
+            {% for locale in locales %}
+                <option value="{{ locale }}"{% if locale == selectedLocale %} selected="selected"{% endif %}>{{ locale }}</option>
+            {% endfor %}
+        </select>
+        
+        <input type="text" id="key" />
+        
+        <input id="add_message" type="button" value="Ajouter" />
+    </form>#}  
+        
+    {% if isWriteable is sameas(false) %}
+        <div class="alert-message error">
+            The translation file "<strong>{{ file }}</strong>" is not writable.
+        </div>
+    {% endif %}
+
+    {% if "xliff" != format %}
+        <div class="alert-message warning">
+            Due to limitations of the different loaders/dumpers, some features are unfortunately limited to the XLIFF format. 
+
+            <br /><br />
+
+            However, you can easily convert your existing translation files to the XLIFF format by running:<br />
+            <code>php app/console translation:extract {{ selectedLocale }} --config={{ selectedConfig }} --output-format=xliff</code>
+        </div>
+    {% endif %}
+
+    <h2>Available Messages</h2>
+
+    {% if newMessages is not empty %}
+        <h3>New Messages</h3>
+        <table id="table_trans_new">
+            {% include "ZENTranslationBundle:Translate:messages.html.twig" with {"messages": newMessages} %}
+        </table>
+    {% endif %}
+
+    {% if existingMessages is not empty %}
+        <h3>Existing Messages</h3>
+        <table id="table_trans_exist">
+            {% include "ZENTranslationBundle:Translate:messages.html.twig" with {"messages": existingMessages} %}
+        </table>
+    {% endif %}
+
+{% endblock %}

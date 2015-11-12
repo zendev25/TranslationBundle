@@ -1,0 +1,8 @@
+body > .container {
+	margin-top: 50px;
+}
+
+.LI-translation-anchor {
+	padding-top: 50px;
+	margin-top: -50px;
+}
