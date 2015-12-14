@@ -1,8 +1,16 @@
 body > .container {
-	margin-top: 50px;
+    margin-top: 50px;
 }
 
 .LI-translation-anchor {
-	padding-top: 50px;
-	margin-top: -50px;
+    padding-top: 50px;
+    margin-top: -50px;
+}
+
+.topbar {
+    top: 40px;
+}
+
+.navbar {    
+    background-color: #222222;
 }
